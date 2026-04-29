@@ -1,29 +1,24 @@
-const projects = [
-  {
-    title: 'Surfers paradise',
-    tags: ['Social Media', 'Photography'],
-    image: 'https://www.figma.com/api/mcp/asset/3c9ee37d-bb78-4ec6-8293-edad92739101',
-    desktopHeight: 744,
-  },
-  {
-    title: 'Cyberpunk caffe',
-    tags: ['Social Media', 'Photography'],
-    image: 'https://www.figma.com/api/mcp/asset/dd791977-8a30-4726-b603-55337855ef10',
-    desktopHeight: 699,
-  },
-  {
-    title: 'Agency 976',
-    tags: ['Social Media', 'Photography'],
-    image: 'https://www.figma.com/api/mcp/asset/4db16df8-cf45-42a2-8536-5bf32947c337',
-    desktopHeight: 699,
-  },
-  {
-    title: 'Minimal Playground',
-    tags: ['Social Media', 'Photography'],
-    image: 'https://www.figma.com/api/mcp/asset/ffcc6e0c-d800-4dd8-a94a-587a12e9314b',
-    desktopHeight: 744,
-  },
-]
+import { sanityFetch } from '@/sanity/lib/live'
+import { urlFor } from '@/sanity/lib/image'
+
+type PortfolioItem = {
+  _id: string
+  title: string
+  tags: string[]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  image: any
+  desktopHeight: number
+  link?: string
+}
+
+const PORTFOLIO_QUERY = `*[_type == "portfolioItem"] | order(order asc) {
+  _id,
+  title,
+  tags,
+  image,
+  desktopHeight,
+  link
+}`
 
 function ArrowIcon() {
   return (
@@ -52,35 +47,43 @@ function Corner({ className }: { className?: string }) {
   )
 }
 
-function ProjectCard({ title, tags, image, height }: {
-  title: string
-  tags: string[]
-  image: string
-  height?: number
-}) {
-  return (
+function ProjectCard({ item, height }: { item: PortfolioItem; height?: number }) {
+  const imageUrl = item.image ? urlFor(item.image).width(1200).url() : null
+
+  const card = (
     <div className="flex flex-col gap-[10px]">
       <div
-        className="relative overflow-hidden w-full"
+        className="relative overflow-hidden w-full bg-[#e8e8e8]"
         style={height ? { height } : undefined}
       >
-        <img
-          src={image}
-          alt={title}
-          className="absolute inset-0 size-full object-cover"
-        />
+        {imageUrl && (
+          <img
+            src={imageUrl}
+            alt={item.title}
+            className="absolute inset-0 size-full object-cover"
+          />
+        )}
         <div className="absolute bottom-4 left-4 flex gap-3">
-          {tags.map(tag => <TagPill key={tag} label={tag} />)}
+          {item.tags?.map(tag => <TagPill key={tag} label={tag} />)}
         </div>
       </div>
       <div className="flex items-center justify-between">
         <p className="font-black text-black leading-[1.1] uppercase whitespace-nowrap text-[24px] md:text-[36px]" style={{ letterSpacing: '-0.04em' }}>
-          {title}
+          {item.title}
         </p>
         <ArrowIcon />
       </div>
     </div>
   )
+
+  if (item.link) {
+    return (
+      <a href={item.link} target="_blank" rel="noopener noreferrer">
+        {card}
+      </a>
+    )
+  }
+  return card
 }
 
 function BracketedCta() {
@@ -106,13 +109,17 @@ function BracketedCta() {
   )
 }
 
-export default function Portfolio() {
+export default async function Portfolio() {
+  const { data } = await sanityFetch({ query: PORTFOLIO_QUERY })
+  const projects = data as PortfolioItem[]
+
+  if (!projects?.length) return null
+
   return (
     <section className="px-4 md:px-8 py-12 md:py-20">
 
       {/* ── Mobile ── */}
       <div className="md:hidden flex flex-col gap-8">
-        {/* Header */}
         <div className="flex flex-col gap-4 uppercase">
           <p className="text-[14px] text-[#1f1f1f] leading-[1.1]" style={{ fontFamily: 'var(--font-geist-mono)' }}>
             [ portfolio ]
@@ -123,23 +130,20 @@ export default function Portfolio() {
               <p>Work</p>
             </div>
             <p className="text-[14px] text-[#1f1f1f] leading-[1.1]" style={{ fontFamily: 'var(--font-geist-mono)' }}>
-              004
+              {String(projects.length).padStart(3, '0')}
             </p>
           </div>
         </div>
 
-        {/* Cards */}
-        {projects.map(p => (
-          <ProjectCard key={p.title} title={p.title} tags={p.tags} image={p.image} height={390} />
+        {projects.map((p: PortfolioItem) => (
+          <ProjectCard key={p._id} item={p} height={390} />
         ))}
 
-        {/* CTA */}
         <BracketedCta />
       </div>
 
       {/* ── Desktop ── */}
       <div className="hidden md:flex flex-col gap-[61px]">
-        {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex gap-[10px] items-start uppercase whitespace-nowrap">
             <div
@@ -150,10 +154,9 @@ export default function Portfolio() {
               <p>Work</p>
             </div>
             <p className="text-[14px] text-[#1f1f1f] leading-[1.1] pt-1" style={{ fontFamily: 'var(--font-geist-mono)' }}>
-              004
+              {String(projects.length).padStart(3, '0')}
             </p>
           </div>
-          {/* [ portfolio ] rotated */}
           <div className="h-[110px] w-[15px] flex items-center justify-center shrink-0">
             <p
               className="-rotate-90 whitespace-nowrap text-[14px] text-[#1f1f1f] uppercase leading-[1.1]"
@@ -164,24 +167,19 @@ export default function Portfolio() {
           </div>
         </div>
 
-        {/* Two-column grid */}
         <div className="flex gap-6 items-end">
-
-          {/* Left column: self-stretch so it fills the full row height, justify-between distributes cards top→bottom */}
           <div className="flex-1 self-stretch flex flex-col justify-between">
-            <ProjectCard title={projects[0].title} tags={projects[0].tags} image={projects[0].image} height={projects[0].desktopHeight} />
-            <ProjectCard title={projects[1].title} tags={projects[1].tags} image={projects[1].image} height={projects[1].desktopHeight} />
+            {projects[0] && <ProjectCard item={projects[0]} height={projects[0].desktopHeight} />}
+            {projects[1] && <ProjectCard item={projects[1]} height={projects[1].desktopHeight} />}
             <div className="w-[465px]">
               <BracketedCta />
             </div>
           </div>
 
-          {/* Right column: starts 240px down, gap-[117px] between cards */}
           <div className="flex-1 flex flex-col gap-[117px] pt-[240px]">
-            <ProjectCard title={projects[2].title} tags={projects[2].tags} image={projects[2].image} height={projects[2].desktopHeight} />
-            <ProjectCard title={projects[3].title} tags={projects[3].tags} image={projects[3].image} height={projects[3].desktopHeight} />
+            {projects[2] && <ProjectCard item={projects[2]} height={projects[2].desktopHeight} />}
+            {projects[3] && <ProjectCard item={projects[3]} height={projects[3].desktopHeight} />}
           </div>
-
         </div>
       </div>
 
