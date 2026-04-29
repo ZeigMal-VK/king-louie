@@ -4,7 +4,9 @@ import BioSection from "./components/BioSection";
 import FullBleedPhoto from "./components/FullBleedPhoto";
 import Services from "./components/Services";
 import Portfolio from "./components/Portfolio";
+import NewsAchievements from "./components/NewsAchievements";
 import Testimonials from "./components/Testimonials";
+import Footer from "./components/Footer";
 
 export default function Home() {
   return (
@@ -16,6 +18,8 @@ export default function Home() {
       <Services />
       <Portfolio />
       <Testimonials />
+      <NewsAchievements />
+      <Footer />
     </main>
   );
 }
