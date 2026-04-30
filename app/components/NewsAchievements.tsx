@@ -1,3 +1,5 @@
+import MobileSlider from './MobileSlider'
+
 const posts = [
   {
     image: 'https://www.figma.com/api/mcp/asset/ac63f734-8fbe-4c9e-a1c0-7a46ff273ffa',
@@ -86,17 +88,17 @@ export default function NewsAchievements() {
         >
           Keep up with my latest news &amp; achievements
         </h2>
-        <div className="flex gap-4 overflow-x-auto -mx-4 px-4 pb-2">
+        <MobileSlider count={posts.length}>
           {posts.map((post, i) => (
-            <div key={i} className="flex flex-col gap-4 w-[300px] shrink-0">
-              <div className="relative h-[398px] w-[300px] shrink-0 overflow-hidden">
+            <div key={i} className="w-full shrink-0 snap-start flex flex-col gap-4">
+              <div className="relative h-[398px] w-full overflow-hidden">
                 <img src={post.image} alt="" className="absolute inset-0 size-full object-cover pointer-events-none select-none" />
               </div>
               <p className="text-[14px] text-[#1f1f1f] leading-[1.3]" style={{ letterSpacing: '-0.04em' }}>{post.text}</p>
               <ReadMoreLink />
             </div>
           ))}
-        </div>
+        </MobileSlider>
       </div>
 
     </section>

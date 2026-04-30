@@ -1,3 +1,5 @@
+import MobileSlider from './MobileSlider'
+
 const cards = [
   {
     logo: 'https://www.figma.com/api/mcp/asset/9bc99238-6b2f-4f8c-aa03-3fc09239d041',
@@ -109,32 +111,22 @@ export default function Testimonials() {
           Testimonials
         </p>
 
-        {/* Two rotated cards, slightly overlapping, second peeks at edge */}
-        <div className="flex pl-4">
-          {cards
-            .filter(c => c.showMobile)
-            .map((c, i) => (
-              <div
-                key={c.author}
-                className="flex items-center justify-center shrink-0"
-                style={{
-                  width: 268,
-                  marginRight: i === 0 ? -10 : 0,
-                }}
-              >
-                <div style={{ transform: `rotate(${c.mobileRotate}deg)` }}>
-                  <TestimonialCard
-                    logo={c.logo}
-                    logoW={c.logoW}
-                    logoH={c.logoH}
-                    quote={c.quote}
-                    author={c.author}
-                    width={260}
-                  />
-                </div>
+        <MobileSlider count={cards.length}>
+          {cards.map(c => (
+            <div key={c.author} className="w-full shrink-0 snap-start flex justify-center px-4">
+              <div style={{ transform: `rotate(${c.mobileRotate}deg)` }}>
+                <TestimonialCard
+                  logo={c.logo}
+                  logoW={c.logoW}
+                  logoH={c.logoH}
+                  quote={c.quote}
+                  author={c.author}
+                  width={300}
+                />
               </div>
-            ))}
-        </div>
+            </div>
+          ))}
+        </MobileSlider>
       </div>
 
     </section>
