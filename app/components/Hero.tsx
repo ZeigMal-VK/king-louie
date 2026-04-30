@@ -1,7 +1,10 @@
 'use client'
 
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useLayoutEffect, useRef, useState, useEffect } from 'react'
 import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+gsap.registerPlugin(ScrollTrigger)
 
 const heroImage = 'https://www.figma.com/api/mcp/asset/affd98dc-478b-419d-a180-5634ee5ec868'
 const navLinks = ['About', 'Services', 'Projects', 'News', 'Contact']
@@ -71,11 +74,50 @@ export default function Hero() {
   const linkRefs = useRef<(HTMLAnchorElement | null)[]>([])
   const navRef = useRef<HTMLElement>(null)
   const heroContentRef = useRef<HTMLDivElement>(null)
+  const sectionRef = useRef<HTMLElement>(null)
+  const bgRef = useRef<HTMLImageElement>(null)
+
+  // Desktop parallax refs
+  const desktopLabelRef = useRef<HTMLParagraphElement>(null)
+  const desktopHarveyRef = useRef<HTMLSpanElement>(null)
+  const desktopSpecterRef = useRef<HTMLSpanElement>(null)
+
+  // Mobile parallax refs
+  const mobileHarveyGroupRef = useRef<HTMLDivElement>(null)
+  const mobileSpecterRef = useRef<HTMLHeadingElement>(null)
 
   useLayoutEffect(() => {
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
     tl.fromTo(navRef.current, { y: -24, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.8, delay: 0.1 })
     tl.fromTo(heroContentRef.current, { y: 40, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 1 }, '-=0.45')
+  }, [])
+
+  useEffect(() => {
+    const vw = window.innerWidth
+    const st = {
+      trigger: sectionRef.current,
+      start: 'top top',
+      end: 'bottom top',
+      scrub: 1.5,
+    }
+
+    const ctx = gsap.context(() => {
+      gsap.to(bgRef.current, { scale: 1.2, ease: 'none', scrollTrigger: st })
+
+      gsap.to([desktopHarveyRef.current, desktopLabelRef.current, mobileHarveyGroupRef.current], {
+        x: -vw * 0.6,
+        ease: 'none',
+        scrollTrigger: st,
+      })
+
+      gsap.to([desktopSpecterRef.current, mobileSpecterRef.current], {
+        x: vw * 0.6,
+        ease: 'none',
+        scrollTrigger: st,
+      })
+    }, sectionRef)
+
+    return () => ctx.revert()
   }, [])
 
   const openMenu = () => {
@@ -100,9 +142,10 @@ export default function Hero() {
   }
 
   return (
-    <section className="relative h-screen overflow-hidden flex flex-col px-4 md:px-8 md:gap-[240px]">
+    <section ref={sectionRef} className="relative h-screen overflow-hidden flex flex-col px-4 md:px-8 md:gap-[240px]">
       {/* Background photo */}
       <img
+        ref={bgRef}
         src={heroImage}
         alt=""
         aria-hidden
@@ -179,8 +222,8 @@ export default function Hero() {
       {/* Hero content */}
       <div ref={heroContentRef} className="relative flex-1 md:flex-none flex flex-col justify-between md:justify-start pb-6 md:pb-0">
 
-        {/* Mobile: label + name */}
-        <div className="md:hidden flex flex-col items-start w-full">
+        {/* Mobile: label + Harvey group (exits left) */}
+        <div ref={mobileHarveyGroupRef} className="md:hidden flex flex-col items-start w-full">
           <div className="flex items-center justify-center w-full">
             <p
               className="text-[14px] text-white uppercase mix-blend-overlay leading-[1.1] whitespace-nowrap"
@@ -193,24 +236,35 @@ export default function Hero() {
             className="font-medium capitalize text-white text-center mix-blend-overlay leading-[0.85] w-full"
             style={{ letterSpacing: '-0.07em', fontSize: 'min(96px, 21vw)' }}
           >
-            Harvey<br />Specter
+            Harvey
           </h1>
         </div>
+
+        {/* Mobile: Specter (exits right) */}
+        <h1
+          ref={mobileSpecterRef}
+          className="md:hidden font-medium capitalize text-white text-center mix-blend-overlay leading-[0.85] w-full"
+          style={{ letterSpacing: '-0.07em', fontSize: 'min(96px, 21vw)' }}
+        >
+          Specter
+        </h1>
 
         {/* Desktop: w-fit column */}
         <div className="hidden md:flex flex-col mx-auto w-fit">
           <p
+            ref={desktopLabelRef}
             className="text-[14px] text-white uppercase mix-blend-overlay leading-[1.1] whitespace-nowrap mb-[-15px]"
             style={{ fontFamily: 'var(--font-geist-mono)' }}
           >
             [ Hello i&apos;m ]
           </p>
-          <h1
-            className="text-[198px] font-medium capitalize text-white mix-blend-overlay leading-[1.1] whitespace-pre"
-            style={{ letterSpacing: '-0.07em' }}
+          <div
+            className="font-medium capitalize text-white mix-blend-overlay leading-[1.1] whitespace-pre"
+            style={{ fontSize: 198, letterSpacing: '-0.07em' }}
           >
-            {`Harvey   Specter`}
-          </h1>
+            <span ref={desktopHarveyRef} className="inline-block">{`Harvey   `}</span>
+            <span ref={desktopSpecterRef} className="inline-block">Specter</span>
+          </div>
           <div className="self-end flex flex-col gap-[17px] w-[294px]">
             <p className="text-[14px] font-bold italic text-[#1f1f1f] tracking-[-0.035em] uppercase leading-[1.1]">
               H.Studio is a{' '}
