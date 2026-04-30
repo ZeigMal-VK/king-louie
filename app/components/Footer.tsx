@@ -1,3 +1,42 @@
+'use client'
+
+import { useRef } from 'react'
+import gsap from 'gsap'
+
+function FooterButton({ children }: { children: React.ReactNode }) {
+  const fillRef = useRef<HTMLSpanElement>(null)
+  const textRef = useRef<HTMLSpanElement>(null)
+
+  const onEnter = () => {
+    gsap.fromTo(fillRef.current,
+      { scaleX: 0, transformOrigin: 'left center' },
+      { scaleX: 1, duration: 0.4, ease: 'power3.out', transformOrigin: 'left center' }
+    )
+    gsap.to(textRef.current, { color: '#000', duration: 0.2, delay: 0.1 })
+  }
+
+  const onLeave = () => {
+    gsap.to(fillRef.current, { scaleX: 0, duration: 0.35, ease: 'power3.in', transformOrigin: 'right center' })
+    gsap.to(textRef.current, { color: '#fff', duration: 0.15 })
+  }
+
+  return (
+    <button
+      className="relative overflow-hidden self-start border border-white text-white text-[14px] font-medium px-4 py-3 rounded-full whitespace-nowrap"
+      style={{ letterSpacing: '-0.04em' }}
+      onMouseEnter={onEnter}
+      onMouseLeave={onLeave}
+    >
+      <span
+        ref={fillRef}
+        className="absolute inset-0 bg-white rounded-full pointer-events-none"
+        style={{ transform: 'scaleX(0)' }}
+      />
+      <span ref={textRef} className="relative z-10">{children}</span>
+    </button>
+  )
+}
+
 export default function Footer() {
   return (
     <footer className="bg-black">
@@ -14,12 +53,7 @@ export default function Footer() {
             >
               Have a <span className="font-black not-italic">project</span> in mind?
             </p>
-            <button
-              className="self-start border border-white text-white text-[14px] font-medium px-4 py-3 rounded-full whitespace-nowrap"
-              style={{ letterSpacing: '-0.04em' }}
-            >
-              Let&apos;s talk
-            </button>
+            <FooterButton>Let&apos;s talk</FooterButton>
           </div>
 
           <div
@@ -45,7 +79,6 @@ export default function Footer() {
         {/* Bottom row: wordmark | links */}
         <div className="flex items-end justify-between">
           <div className="relative h-[219px] overflow-hidden flex-1">
-            {/* Rotated label */}
             <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[15px] h-[160px] flex items-center justify-center">
               <p
                 className="-rotate-90 whitespace-nowrap text-white uppercase text-[14px]"
@@ -54,7 +87,6 @@ export default function Footer() {
                 [ Coded By Claude ]
               </p>
             </div>
-            {/* Wordmark */}
             <p
               className="absolute top-1/2 -translate-y-1/2 text-white font-semibold capitalize whitespace-nowrap select-none"
               style={{ fontSize: 290, letterSpacing: '-17.4px', lineHeight: 0.8 }}
@@ -85,12 +117,7 @@ export default function Footer() {
             >
               Have a <span className="font-black not-italic">project</span> in mind?
             </p>
-            <button
-              className="self-start border border-white text-white text-[14px] font-medium px-4 py-3 rounded-full"
-              style={{ letterSpacing: '-0.04em' }}
-            >
-              Let&apos;s talk
-            </button>
+            <FooterButton>Let&apos;s talk</FooterButton>
           </div>
           {['Facebook', 'Instagram', 'x.com', 'Linkedin'].map(s => (
             <p

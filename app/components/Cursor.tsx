@@ -61,7 +61,7 @@ export default function Cursor() {
     <>
       <div
         ref={dotRef}
-        className="fixed top-0 left-0 z-[9999] w-2 h-2 bg-white rounded-full pointer-events-none mix-blend-difference"
+        className="fixed top-0 left-0 z-[9999] w-2 h-2 bg-black rounded-full pointer-events-none"
         style={{ transform: 'translate(-50%, -50%)', opacity: 0 }}
       />
       <div
