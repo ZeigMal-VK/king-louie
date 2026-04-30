@@ -7,35 +7,27 @@ const heroImage = 'https://www.figma.com/api/mcp/asset/affd98dc-478b-419d-a180-5
 const navLinks = ['About', 'Services', 'Projects', 'News', 'Contact']
 
 function NavLink({ children }: { children: string }) {
-  const topRef = useRef<HTMLSpanElement>(null)
-  const btmRef = useRef<HTMLSpanElement>(null)
+  const lineRef = useRef<HTMLSpanElement>(null)
 
   const onEnter = () => {
-    gsap.to(topRef.current, { yPercent: -100, duration: 0.35, ease: 'power2.out' })
-    gsap.fromTo(btmRef.current, { yPercent: 100 }, { yPercent: 0, duration: 0.35, ease: 'power2.out' })
+    gsap.fromTo(lineRef.current,
+      { scaleX: 0, transformOrigin: 'left center' },
+      { scaleX: 1, duration: 0.3, ease: 'power3.out' }
+    )
   }
 
   const onLeave = () => {
-    gsap.to(topRef.current, { yPercent: 0, duration: 0.35, ease: 'power2.out' })
-    gsap.to(btmRef.current, { yPercent: 100, duration: 0.35, ease: 'power2.out' })
+    gsap.to(lineRef.current, { scaleX: 0, duration: 0.25, ease: 'power3.in', transformOrigin: 'right center' })
   }
 
   return (
-    <a
-      href="#"
-      className="relative overflow-hidden inline-block"
-      onMouseEnter={onEnter}
-      onMouseLeave={onLeave}
-    >
-      <span ref={topRef} className="block">{children}</span>
+    <a href="#" className="relative pb-0.5" onMouseEnter={onEnter} onMouseLeave={onLeave}>
+      {children}
       <span
-        ref={btmRef}
-        className="absolute inset-0 flex items-center"
-        style={{ transform: 'translateY(100%)' }}
-        aria-hidden="true"
-      >
-        {children}
-      </span>
+        ref={lineRef}
+        className="absolute bottom-0 left-0 w-full h-px bg-black"
+        style={{ transform: 'scaleX(0)', transformOrigin: 'left center' }}
+      />
     </a>
   )
 }
