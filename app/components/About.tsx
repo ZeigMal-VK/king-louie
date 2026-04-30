@@ -1,3 +1,11 @@
+'use client'
+
+import { useEffect, useRef } from 'react'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+gsap.registerPlugin(ScrollTrigger)
+
 function Amp() {
   return (
     <span
@@ -14,21 +22,45 @@ function Amp() {
 }
 
 export default function About() {
+  const sectionRef = useRef<HTMLElement>(null)
+  const labelRef = useRef<HTMLParagraphElement>(null)
+  const ruleRef = useRef<HTMLDivElement>(null)
+  const lineRefs = useRef<(HTMLElement | null)[]>([])
+
+  useEffect(() => {
+    const trigger = { trigger: sectionRef.current, start: 'top 72%' }
+
+    gsap.fromTo(
+      [labelRef.current, ruleRef.current],
+      { y: 12, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.08, ease: 'power3.out', scrollTrigger: trigger }
+    )
+
+    gsap.fromTo(
+      lineRefs.current.filter(Boolean),
+      { y: 50, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 1, stagger: 0.1, ease: 'power3.out', scrollTrigger: { ...trigger, start: 'top 68%' } }
+    )
+  }, [])
+
+  const setLine = (i: number) => (el: HTMLElement | null) => { lineRefs.current[i] = el }
+
   return (
-    <section className="px-4 md:px-8 py-12 md:py-[120px]">
+    <section ref={sectionRef} className="px-4 md:px-8 py-12 md:py-[120px]">
 
       {/* Label + rule */}
       <div className="flex flex-col gap-3 items-end mb-6">
         <p
+          ref={labelRef}
           className="text-[14px] text-[#1f1f1f] uppercase text-right leading-[1.1]"
           style={{ fontFamily: 'var(--font-geist-mono)' }}
         >
           [ 8+ years in industry ]
         </p>
-        <div className="w-full h-px bg-[#1f1f1f]" />
+        <div ref={ruleRef} className="w-full h-px bg-[#1f1f1f]" />
       </div>
 
-      {/* Mobile: centered, 32px */}
+      {/* Mobile */}
       <div className="md:hidden flex flex-col gap-2 items-center text-center uppercase">
         <p
           className="text-[14px] text-[#1f1f1f] leading-[1.1] mb-1"
@@ -59,12 +91,12 @@ export default function About() {
         </p>
       </div>
 
-      {/* Desktop: staggered 96px */}
+      {/* Desktop */}
       <div className="hidden md:flex flex-col gap-2">
 
-        {/* Line 1 + 001 badge */}
         <div className="flex items-start gap-3">
           <p
+            ref={setLine(0)}
             className="text-[96px] font-light text-black leading-[0.84] uppercase whitespace-pre shrink-0"
             style={{ letterSpacing: '-0.08em' }}
           >
@@ -78,9 +110,9 @@ export default function About() {
           </p>
         </div>
 
-        {/* Line 2: Photographer — indent 214px */}
         <div className="pl-[214px]">
           <p
+            ref={setLine(1)}
             className="text-[96px] font-light text-black leading-[0.84] uppercase whitespace-nowrap"
             style={{ letterSpacing: '-0.08em' }}
           >
@@ -88,9 +120,9 @@ export default function About() {
           </p>
         </div>
 
-        {/* Line 3: Born & raised — indent 610px */}
         <div className="pl-[610px]">
           <p
+            ref={setLine(2)}
             className="text-[96px] font-light text-black leading-[0.84] uppercase whitespace-nowrap"
             style={{ letterSpacing: '-0.08em' }}
           >
@@ -98,17 +130,17 @@ export default function About() {
           </p>
         </div>
 
-        {/* Line 4: on the south side — no indent */}
         <p
+          ref={setLine(3)}
           className="text-[96px] font-light text-black leading-[0.84] uppercase whitespace-nowrap"
           style={{ letterSpacing: '-0.08em' }}
         >
           on the south side
         </p>
 
-        {/* Line 5: of chicago. — indent 606px, with floating label */}
         <div className="relative pl-[606px]">
           <p
+            ref={setLine(4)}
             className="text-[96px] font-light text-black leading-[0.84] uppercase whitespace-nowrap"
             style={{ letterSpacing: '-0.08em' }}
           >

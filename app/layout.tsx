@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Geist_Mono, Cormorant, Playfair_Display } from "next/font/google";
 import { SanityLive } from "@/sanity/lib/live";
+import Cursor from "./components/Cursor";
 import "./globals.css";
 
 const inter = Inter({
@@ -42,7 +43,8 @@ export default function RootLayout({
       lang="en"
       className={`${inter.variable} ${geistMono.variable} ${cormorant.variable} ${playfair.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col cursor-none">
+        <Cursor />
         {children}
         <SanityLive />
       </body>

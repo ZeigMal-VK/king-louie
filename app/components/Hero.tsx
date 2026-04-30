@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 
 const heroImage = 'https://www.figma.com/api/mcp/asset/affd98dc-478b-419d-a180-5634ee5ec868'
@@ -77,6 +77,14 @@ export default function Hero() {
   const [menuOpen, setMenuOpen] = useState(false)
   const overlayRef = useRef<HTMLDivElement>(null)
   const linkRefs = useRef<(HTMLAnchorElement | null)[]>([])
+  const navRef = useRef<HTMLElement>(null)
+  const heroContentRef = useRef<HTMLDivElement>(null)
+
+  useLayoutEffect(() => {
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
+    tl.fromTo(navRef.current, { y: -24, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.8, delay: 0.1 })
+    tl.fromTo(heroContentRef.current, { y: 40, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 1 }, '-=0.45')
+  }, [])
 
   const openMenu = () => {
     setMenuOpen(true)
@@ -119,7 +127,7 @@ export default function Hero() {
       />
 
       {/* Nav */}
-      <nav className="relative z-10 shrink-0 flex items-center justify-between py-6">
+      <nav ref={navRef} className="relative z-10 shrink-0 flex items-center justify-between py-6">
         <span className="font-semibold text-[16px] tracking-[-0.04em] capitalize text-black">
           H.Studio
         </span>
@@ -177,7 +185,7 @@ export default function Hero() {
       </div>
 
       {/* Hero content */}
-      <div className="relative flex-1 md:flex-none flex flex-col justify-between md:justify-start pb-6 md:pb-0">
+      <div ref={heroContentRef} className="relative flex-1 md:flex-none flex flex-col justify-between md:justify-start pb-6 md:pb-0">
 
         {/* Mobile: label + name */}
         <div className="md:hidden flex flex-col items-start w-full">
