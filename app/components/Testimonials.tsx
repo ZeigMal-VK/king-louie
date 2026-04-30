@@ -12,7 +12,7 @@ const cards = [
     logoW: 138, logoH: 19,
     quote: 'Professional, precise, and incredibly fast at handling complex product visualizations and templates.',
     author: 'Lukas Weber',
-    left: 776, top: 272, rotate: 2.9,
+    left: 776, top: 190, rotate: 2.9,
     mobileRotate: 0, showMobile: false,
   },
   {

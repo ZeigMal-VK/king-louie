@@ -10,7 +10,7 @@ export default function Hero() {
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
-    <section className="relative h-screen md:h-[847px] overflow-hidden flex flex-col px-4 md:px-8 md:gap-[240px]">
+    <section className="relative h-screen overflow-hidden flex flex-col px-4 md:px-8 md:gap-[240px]">
       {/* Background photo */}
       <img
         src={heroImage}
@@ -101,10 +101,10 @@ export default function Hero() {
             </p>
           </div>
           <h1
-            className="text-[96px] font-medium capitalize text-white text-center mix-blend-overlay leading-[0.8] w-full whitespace-pre-wrap"
-            style={{ letterSpacing: '-0.07em' }}
+            className="font-medium capitalize text-white text-center mix-blend-overlay leading-[0.85] w-full"
+            style={{ letterSpacing: '-0.07em', fontSize: 'min(96px, 21vw)' }}
           >
-            {`Harvey   Specter`}
+            Harvey<br />Specter
           </h1>
         </div>
 
@@ -137,7 +137,7 @@ export default function Hero() {
         </div>
 
         {/* Mobile: description + CTA at bottom */}
-        <div className="md:hidden flex flex-col gap-[17px] w-[293px]">
+        <div className="md:hidden flex flex-col gap-[17px] w-full max-w-[293px]">
           <p className="text-[14px] font-bold italic text-[#1f1f1f] tracking-[-0.035em] uppercase leading-[1.1]">
             H.Studio is a{' '}
             <span className="font-normal">full-service</span>
