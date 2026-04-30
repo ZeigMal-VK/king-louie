@@ -1,13 +1,103 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import gsap from 'gsap'
 
 const heroImage = 'https://www.figma.com/api/mcp/asset/affd98dc-478b-419d-a180-5634ee5ec868'
-
 const navLinks = ['About', 'Services', 'Projects', 'News', 'Contact']
+
+function NavLink({ children }: { children: string }) {
+  const topRef = useRef<HTMLSpanElement>(null)
+  const btmRef = useRef<HTMLSpanElement>(null)
+
+  const onEnter = () => {
+    gsap.to(topRef.current, { yPercent: -100, duration: 0.35, ease: 'power2.out' })
+    gsap.fromTo(btmRef.current, { yPercent: 100 }, { yPercent: 0, duration: 0.35, ease: 'power2.out' })
+  }
+
+  const onLeave = () => {
+    gsap.to(topRef.current, { yPercent: 0, duration: 0.35, ease: 'power2.out' })
+    gsap.to(btmRef.current, { yPercent: 100, duration: 0.35, ease: 'power2.out' })
+  }
+
+  return (
+    <a
+      href="#"
+      className="relative overflow-hidden inline-block"
+      onMouseEnter={onEnter}
+      onMouseLeave={onLeave}
+    >
+      <span ref={topRef} className="block">{children}</span>
+      <span
+        ref={btmRef}
+        className="absolute inset-0 flex items-center"
+        style={{ transform: 'translateY(100%)' }}
+        aria-hidden="true"
+      >
+        {children}
+      </span>
+    </a>
+  )
+}
+
+function CtaButton({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+  const fillRef = useRef<HTMLSpanElement>(null)
+  const textRef = useRef<HTMLSpanElement>(null)
+
+  const onEnter = () => {
+    gsap.fromTo(fillRef.current,
+      { scaleX: 0, transformOrigin: 'left center' },
+      { scaleX: 1, duration: 0.4, ease: 'power3.out', transformOrigin: 'left center' }
+    )
+    gsap.to(textRef.current, { color: '#000', duration: 0.2, delay: 0.1 })
+  }
+
+  const onLeave = () => {
+    gsap.to(fillRef.current, { scaleX: 0, duration: 0.35, ease: 'power3.in', transformOrigin: 'right center' })
+    gsap.to(textRef.current, { color: '#fff', duration: 0.15 })
+  }
+
+  return (
+    <button
+      className={`relative overflow-hidden bg-black text-white text-[14px] font-medium tracking-[-0.035em] px-4 py-3 rounded-full ${className}`}
+      onMouseEnter={onEnter}
+      onMouseLeave={onLeave}
+    >
+      <span
+        ref={fillRef}
+        className="absolute inset-0 bg-white rounded-full pointer-events-none"
+        style={{ transform: 'scaleX(0)' }}
+      />
+      <span ref={textRef} className="relative z-10">{children}</span>
+    </button>
+  )
+}
 
 export default function Hero() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const overlayRef = useRef<HTMLDivElement>(null)
+  const linkRefs = useRef<(HTMLAnchorElement | null)[]>([])
+
+  const openMenu = () => {
+    setMenuOpen(true)
+    gsap.fromTo(overlayRef.current,
+      { x: '100%' },
+      { x: '0%', duration: 0.55, ease: 'expo.out' }
+    )
+    gsap.fromTo(linkRefs.current,
+      { x: 40, autoAlpha: 0 },
+      { x: 0, autoAlpha: 1, duration: 0.5, stagger: 0.07, delay: 0.2, ease: 'power3.out' }
+    )
+  }
+
+  const closeMenu = () => {
+    gsap.to(overlayRef.current, {
+      x: '100%',
+      duration: 0.4,
+      ease: 'expo.in',
+      onComplete: () => setMenuOpen(false),
+    })
+  }
 
   return (
     <section className="relative h-screen overflow-hidden flex flex-col px-4 md:px-8 md:gap-[240px]">
@@ -19,7 +109,7 @@ export default function Hero() {
         className="absolute inset-0 size-full object-cover object-top pointer-events-none select-none"
       />
 
-      {/* Bottom blur overlay — fades in from top */}
+      {/* Bottom blur overlay */}
       <div
         className="absolute bottom-0 left-0 right-0 h-[349px] backdrop-blur-[10px] bg-[rgba(217,217,217,0.01)]"
         style={{
@@ -34,22 +124,17 @@ export default function Hero() {
           H.Studio
         </span>
 
-        {/* Desktop links */}
         <div className="hidden md:flex items-center gap-14 font-semibold text-[16px] tracking-[-0.04em] capitalize text-black">
           {navLinks.map(link => (
-            <a key={link} href="#" className="hover:opacity-70 transition-opacity">
-              {link}
-            </a>
+            <NavLink key={link}>{link}</NavLink>
           ))}
         </div>
 
-        {/* Desktop CTA */}
-        <button className="hidden md:flex items-center justify-center bg-black text-white text-[14px] font-medium tracking-[-0.035em] px-4 py-3 rounded-full">
+        <CtaButton className="hidden md:inline-flex items-center justify-center">
           Let&apos;s talk
-        </button>
+        </CtaButton>
 
-        {/* Mobile hamburger */}
-        <button className="md:hidden" onClick={() => setMenuOpen(true)} aria-label="Open menu">
+        <button className="md:hidden" onClick={openMenu} aria-label="Open menu">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <rect y="3" width="24" height="2.5" fill="black" />
             <rect y="10.75" width="24" height="2.5" fill="black" />
@@ -58,39 +143,43 @@ export default function Hero() {
         </button>
       </nav>
 
-      {/* Mobile menu overlay */}
-      {menuOpen && (
-        <div className="fixed inset-0 z-50 bg-white flex flex-col px-4 md:hidden">
-          <div className="flex items-center justify-between py-6">
-            <span className="font-semibold text-[16px] tracking-[-0.04em] capitalize">H.Studio</span>
-            <button onClick={() => setMenuOpen(false)} aria-label="Close menu">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path d="M5 5L19 19M5 19L19 5" stroke="black" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-            </button>
-          </div>
-          <nav className="flex flex-col mt-6 border-t border-black/10">
-            {navLinks.map(link => (
-              <a
-                key={link}
-                href="#"
-                className="text-[28px] font-semibold capitalize tracking-[-0.04em] text-black py-5 border-b border-black/10"
-                onClick={() => setMenuOpen(false)}
-              >
-                {link}
-              </a>
-            ))}
-          </nav>
-          <button className="mt-auto mb-10 self-start bg-black text-white text-[14px] font-medium tracking-[-0.035em] px-4 py-3 rounded-full">
-            Let&apos;s talk
+      {/* Mobile menu — always mounted so ref is available on first open */}
+      <div
+        ref={overlayRef}
+        className="fixed inset-0 z-50 bg-white flex flex-col px-4 md:hidden"
+        style={{ transform: 'translateX(100%)', pointerEvents: menuOpen ? 'auto' : 'none' }}
+        aria-hidden={!menuOpen}
+      >
+        <div className="flex items-center justify-between py-6">
+          <span className="font-semibold text-[16px] tracking-[-0.04em] capitalize">H.Studio</span>
+          <button onClick={closeMenu} aria-label="Close menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M5 5L19 19M5 19L19 5" stroke="black" strokeWidth="2" strokeLinecap="round" />
+            </svg>
           </button>
         </div>
-      )}
+        <nav className="flex flex-col mt-6 border-t border-black/10">
+          {navLinks.map((link, i) => (
+            <a
+              key={link}
+              ref={el => { linkRefs.current[i] = el }}
+              href="#"
+              className="text-[28px] font-semibold capitalize tracking-[-0.04em] text-black py-5 border-b border-black/10"
+              onClick={closeMenu}
+            >
+              {link}
+            </a>
+          ))}
+        </nav>
+        <CtaButton className="mt-auto mb-10 self-start">
+          Let&apos;s talk
+        </CtaButton>
+      </div>
 
-      {/* Hero content — no z-index so mix-blend-overlay on h1 blends with the photo */}
+      {/* Hero content */}
       <div className="relative flex-1 md:flex-none flex flex-col justify-between md:justify-start pb-6 md:pb-0">
 
-        {/* Mobile: label + name stacked, description at bottom */}
+        {/* Mobile: label + name */}
         <div className="md:hidden flex flex-col items-start w-full">
           <div className="flex items-center justify-center w-full">
             <p
@@ -108,7 +197,7 @@ export default function Hero() {
           </h1>
         </div>
 
-        {/* Desktop: w-fit column — label anchored above H, description anchored below R */}
+        {/* Desktop: w-fit column */}
         <div className="hidden md:flex flex-col mx-auto w-fit">
           <p
             className="text-[14px] text-white uppercase mix-blend-overlay leading-[1.1] whitespace-nowrap mb-[-15px]"
@@ -130,13 +219,11 @@ export default function Hero() {
               <span className="font-normal">award winning</span>
               {' '}desing and art group specializing in branding, web design and engineering.
             </p>
-            <button className="self-start bg-black text-white text-[14px] font-medium tracking-[-0.035em] px-4 py-3 rounded-full">
-              Let&apos;s talk
-            </button>
+            <CtaButton className="self-start">Let&apos;s talk</CtaButton>
           </div>
         </div>
 
-        {/* Mobile: description + CTA at bottom */}
+        {/* Mobile: description + CTA */}
         <div className="md:hidden flex flex-col gap-[17px] w-full max-w-[293px]">
           <p className="text-[14px] font-bold italic text-[#1f1f1f] tracking-[-0.035em] uppercase leading-[1.1]">
             H.Studio is a{' '}
@@ -145,9 +232,7 @@ export default function Hero() {
             <span className="font-normal">award winning</span>
             {' '}desing and art group specializing in branding, web design and engineering.
           </p>
-          <button className="self-start bg-black text-white text-[14px] font-medium tracking-[-0.035em] px-4 py-3 rounded-full">
-            Let&apos;s talk
-          </button>
+          <CtaButton className="self-start">Let&apos;s talk</CtaButton>
         </div>
 
       </div>
