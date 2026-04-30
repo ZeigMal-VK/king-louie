@@ -1,5 +1,6 @@
 import { sanityFetch } from '@/sanity/lib/live'
 import { urlFor } from '@/sanity/lib/image'
+import PortfolioCta from './PortfolioCta'
 
 type PortfolioItem = {
   _id: string
@@ -86,28 +87,6 @@ function ProjectCard({ item, height }: { item: PortfolioItem; height?: number })
   return card
 }
 
-function BracketedCta() {
-  return (
-    <div className="flex items-center gap-3">
-      <div className="self-stretch flex flex-col justify-between w-6 shrink-0">
-        <Corner />
-        <Corner className="-rotate-90" />
-      </div>
-      <div className="flex-1 flex flex-col gap-[10px] py-3">
-        <p className="italic text-[14px] text-[#1f1f1f] leading-[1.3] tracking-[-0.035em]">
-          Discover how my creativity transforms ideas into impactful digital experiences — schedule a call with me to get started.
-        </p>
-        <button className="self-start bg-black text-white text-[14px] font-medium tracking-[-0.035em] px-4 py-3 rounded-full">
-          Let&apos;s talk
-        </button>
-      </div>
-      <div className="self-stretch flex flex-col justify-between w-6 shrink-0">
-        <Corner className="rotate-90" />
-        <Corner className="rotate-180" />
-      </div>
-    </div>
-  )
-}
 
 export default async function Portfolio() {
   const { data } = await sanityFetch({ query: PORTFOLIO_QUERY })
@@ -139,7 +118,7 @@ export default async function Portfolio() {
           <ProjectCard key={p._id} item={p} height={390} />
         ))}
 
-        <BracketedCta />
+        <PortfolioCta />
       </div>
 
       {/* ── Desktop ── */}
@@ -172,7 +151,7 @@ export default async function Portfolio() {
             {projects[0] && <ProjectCard item={projects[0]} height={projects[0].desktopHeight} />}
             {projects[1] && <ProjectCard item={projects[1]} height={projects[1].desktopHeight} />}
             <div className="w-[465px]">
-              <BracketedCta />
+              <PortfolioCta />
             </div>
           </div>
 
