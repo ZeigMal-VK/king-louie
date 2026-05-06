@@ -1,5 +1,5 @@
-const desktopImage = 'https://www.figma.com/api/mcp/asset/a0b95547-00ea-4ec3-bd7f-f3dd03ab553b'
-const mobileImage = 'https://www.figma.com/api/mcp/asset/80b353fb-3e2e-4a6a-8c30-c38043f23068'
+const desktopImage = '/images/full-bleed.png'
+const mobileImage = '/images/full-bleed.png'
 
 export default function FullBleedPhoto() {
   return (

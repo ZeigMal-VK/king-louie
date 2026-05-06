@@ -26,6 +26,7 @@ export default function About() {
   const labelRef = useRef<HTMLParagraphElement>(null)
   const ruleRef = useRef<HTMLDivElement>(null)
   const lineRefs = useRef<(HTMLElement | null)[]>([])
+  const desktopBlockRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const trigger = { trigger: sectionRef.current, start: 'top 72%' }
@@ -36,12 +37,55 @@ export default function About() {
       { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.08, ease: 'power3.out', scrollTrigger: trigger }
     )
 
-    gsap.fromTo(
-      lineRefs.current.filter(Boolean),
-      { y: 50, autoAlpha: 0 },
-      { y: 0, autoAlpha: 1, duration: 1, stagger: 0.1, ease: 'power3.out', scrollTrigger: { ...trigger, start: 'top 68%' } }
+    const block = desktopBlockRef.current
+    const lines = lineRefs.current.filter(Boolean) as HTMLElement[]
+    if (!block || !lines.length) return
+
+    const update = () => {
+      const blockRect = block.getBoundingClientRect()
+      block.style.setProperty('--total-height', `${blockRect.height}px`)
+      lines.forEach((line) => {
+        const offset = line.getBoundingClientRect().top - blockRect.top
+        line.style.setProperty('--line-offset', `${offset}px`)
+      })
+    }
+    update()
+
+    const fillTween = gsap.fromTo(
+      block,
+      { '--fill': '0%' },
+      {
+        '--fill': '100%',
+        ease: 'none',
+        scrollTrigger: {
+          trigger: block,
+          start: 'top 75%',
+          end: 'bottom 35%',
+          scrub: true,
+          onRefresh: update,
+        },
+      }
     )
+
+    window.addEventListener('resize', update)
+
+    return () => {
+      window.removeEventListener('resize', update)
+      if (fillTween.scrollTrigger) fillTween.scrollTrigger.kill()
+    }
   }, [])
+
+  const fillStyle: React.CSSProperties = {
+    letterSpacing: '-0.08em',
+    backgroundImage:
+      'linear-gradient(180deg, #000 0%, #000 var(--fill, 0%), rgba(0,0,0,0.12) var(--fill, 0%), rgba(0,0,0,0.12) 100%)',
+    backgroundSize: '100% var(--total-height, 100%)',
+    backgroundPosition: '0 calc(-1 * var(--line-offset, 0px))',
+    backgroundRepeat: 'no-repeat',
+    WebkitBackgroundClip: 'text',
+    backgroundClip: 'text',
+    color: 'transparent',
+  }
 
   const setLine = (i: number) => (el: HTMLElement | null) => { lineRefs.current[i] = el }
 
@@ -92,13 +136,13 @@ export default function About() {
       </div>
 
       {/* Desktop */}
-      <div className="hidden md:flex flex-col gap-2">
+      <div ref={desktopBlockRef} className="hidden md:flex flex-col gap-2">
 
         <div className="flex items-start gap-3">
           <p
             ref={setLine(0)}
-            className="text-[96px] font-light text-black leading-[0.84] uppercase whitespace-pre shrink-0"
-            style={{ letterSpacing: '-0.08em' }}
+            className="text-[6.67vw] font-light leading-[0.84] uppercase whitespace-pre shrink-0"
+            style={fillStyle}
           >
             {`A creative director   /`}
           </p>
@@ -110,21 +154,21 @@ export default function About() {
           </p>
         </div>
 
-        <div className="pl-[214px]">
+        <div className="pl-[14.86vw]">
           <p
             ref={setLine(1)}
-            className="text-[96px] font-light text-black leading-[0.84] uppercase whitespace-nowrap"
-            style={{ letterSpacing: '-0.08em' }}
+            className="text-[6.67vw] font-light leading-[0.84] uppercase whitespace-nowrap"
+            style={fillStyle}
           >
             Photographer
           </p>
         </div>
 
-        <div className="pl-[610px]">
+        <div className="pl-[42.36vw]">
           <p
             ref={setLine(2)}
-            className="text-[96px] font-light text-black leading-[0.84] uppercase whitespace-nowrap"
-            style={{ letterSpacing: '-0.08em' }}
+            className="text-[6.67vw] font-light leading-[0.84] uppercase whitespace-nowrap"
+            style={fillStyle}
           >
             Born <Amp /> raised
           </p>
@@ -132,22 +176,22 @@ export default function About() {
 
         <p
           ref={setLine(3)}
-          className="text-[96px] font-light text-black leading-[0.84] uppercase whitespace-nowrap"
-          style={{ letterSpacing: '-0.08em' }}
+          className="text-[6.67vw] font-light leading-[0.84] uppercase whitespace-nowrap"
+          style={fillStyle}
         >
           on the south side
         </p>
 
-        <div className="relative pl-[606px]">
+        <div className="relative pl-[42.08vw]">
           <p
             ref={setLine(4)}
-            className="text-[96px] font-light text-black leading-[0.84] uppercase whitespace-nowrap"
-            style={{ letterSpacing: '-0.08em' }}
+            className="text-[6.67vw] font-light leading-[0.84] uppercase whitespace-nowrap"
+            style={fillStyle}
           >
             of chicago.
           </p>
           <p
-            className="absolute top-[26px] left-[1079px] text-[14px] text-[#1f1f1f] leading-[1.1] whitespace-nowrap"
+            className="absolute top-[1.81vw] left-[74.93vw] text-[14px] text-[#1f1f1f] leading-[1.1] whitespace-nowrap"
             style={{ fontFamily: 'var(--font-geist-mono)' }}
           >
             [ creative freelancer ]

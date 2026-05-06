@@ -3,25 +3,25 @@ const services = [
     num: '[ 1 ]',
     title: 'Brand Discovery',
     description: 'Placeholder description of this service. Explain the value you provide and the outcomes clients can expect. Keep it to two or three sentences.',
-    image: 'https://www.figma.com/api/mcp/asset/26ebff88-076f-42f5-a729-d3c86719ca0d',
+    image: '/images/service-1.png',
   },
   {
     num: '[ 2 ]',
     title: 'Web design & Dev',
     description: 'Placeholder description of this service. Explain the value you provide and the outcomes clients can expect. Keep it to two or three sentences.',
-    image: 'https://www.figma.com/api/mcp/asset/8c30488b-964f-4e0d-ba4e-5caeb4abecfc',
+    image: '/images/service-2.png',
   },
   {
     num: '[ 3 ]',
     title: 'Marketing',
     description: 'Placeholder description of this service. Explain the value you provide and the outcomes clients can expect. Keep it to two or three sentences.',
-    image: 'https://www.figma.com/api/mcp/asset/47bc2d5f-e8e3-44f6-bf4d-c91b09604f13',
+    image: '/images/service-3.png',
   },
   {
     num: '[ 4 ]',
     title: 'Photography',
     description: 'Placeholder description of this service. Explain the value you provide and the outcomes clients can expect. Keep it to two or three sentences.',
-    image: 'https://www.figma.com/api/mcp/asset/61b5960d-6bfe-4135-8d91-de6d426894bc',
+    image: '/images/service-4.png',
   },
 ]
 

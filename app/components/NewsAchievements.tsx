@@ -2,15 +2,15 @@ import MobileSlider from './MobileSlider'
 
 const posts = [
   {
-    image: 'https://www.figma.com/api/mcp/asset/ac63f734-8fbe-4c9e-a1c0-7a46ff273ffa',
+    image: '/images/news-1.png',
     text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
   },
   {
-    image: 'https://www.figma.com/api/mcp/asset/1d09cdf6-da2e-450b-8509-f28b1b26a767',
+    image: '/images/news-2.png',
     text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
   },
   {
-    image: 'https://www.figma.com/api/mcp/asset/e3b0b734-b6db-4bbd-905a-addc87267596',
+    image: '/images/news-3.png',
     text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
   },
 ]

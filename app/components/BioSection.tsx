@@ -1,4 +1,12 @@
-const portraitImage = 'https://www.figma.com/api/mcp/asset/5ee3f7e1-9f78-460f-b6d4-0890434d305e'
+'use client'
+
+import { useEffect, useRef } from 'react'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+gsap.registerPlugin(ScrollTrigger)
+
+const portraitImage = '/images/portrait.png'
 
 function Corner({ className }: { className?: string }) {
   return (
@@ -38,8 +46,63 @@ function BracketedText() {
 }
 
 export default function BioSection() {
+  const sectionRef = useRef<HTMLElement>(null)
+  const mobileOverlayRef = useRef<HTMLDivElement>(null)
+  const desktopOverlayRef = useRef<HTMLDivElement>(null)
+  const mobileImageRef = useRef<HTMLDivElement>(null)
+  const desktopImageRef = useRef<HTMLDivElement>(null)
+  const desktopTextRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const triggers: ScrollTrigger[] = []
+
+    const setup = (overlay: HTMLDivElement | null, container: HTMLDivElement | null) => {
+      if (!overlay || !container) return
+      const tween = gsap.fromTo(
+        overlay,
+        { clipPath: 'inset(0 0 0 0)' },
+        {
+          clipPath: 'inset(0 0 0 100%)',
+          ease: 'none',
+          scrollTrigger: {
+            trigger: container,
+            start: 'top 80%',
+            end: 'bottom 30%',
+            scrub: true,
+          },
+        }
+      )
+      if (tween.scrollTrigger) triggers.push(tween.scrollTrigger)
+    }
+
+    setup(mobileOverlayRef.current, mobileImageRef.current)
+    setup(desktopOverlayRef.current, desktopImageRef.current)
+
+    if (desktopTextRef.current && sectionRef.current) {
+      const textTween = gsap.fromTo(
+        desktopTextRef.current,
+        { x: 0 },
+        {
+          x: -80,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top 80%',
+            end: 'bottom 30%',
+            scrub: true,
+          },
+        }
+      )
+      if (textTween.scrollTrigger) triggers.push(textTween.scrollTrigger)
+    }
+
+    return () => {
+      triggers.forEach((t) => t.kill())
+    }
+  }, [])
+
   return (
-    <section className="px-4 md:px-8 py-12 md:py-20">
+    <section ref={sectionRef} className="px-4 md:px-8 py-12 md:py-20">
 
       {/* Mobile */}
       <div className="md:hidden flex flex-col gap-5">
@@ -50,8 +113,12 @@ export default function BioSection() {
           [ About ]
         </p>
         <BracketedText />
-        <div className="w-full aspect-[422/594] overflow-hidden">
-          <img src={portraitImage} alt="Portrait" className="size-full object-cover" />
+        <div ref={mobileImageRef} className="relative w-full aspect-[422/594] overflow-hidden">
+          <img src={portraitImage} alt="Portrait" className="absolute inset-0 size-full object-cover block" />
+          <div
+            ref={mobileOverlayRef}
+            className="absolute inset-0 bg-black"
+          />
         </div>
       </div>
 
@@ -65,7 +132,7 @@ export default function BioSection() {
         {/* Right: text + image, bottom-aligned */}
         <div className="flex gap-8 items-end w-[983px] shrink-0">
           {/* Bracketed text — fills remaining space */}
-          <div className="flex-1 min-w-0">
+          <div ref={desktopTextRef} className="flex-1 min-w-0 will-change-transform">
             <BracketedText />
           </div>
 
@@ -74,8 +141,12 @@ export default function BioSection() {
             <p className="text-[14px] text-[#1f1f1f] uppercase leading-[1.1]" style={{ fontFamily: 'var(--font-geist-mono)' }}>
               002
             </p>
-            <div className="w-[436px] h-[614px] overflow-hidden shrink-0">
-              <img src={portraitImage} alt="Portrait" className="size-full object-cover" />
+            <div ref={desktopImageRef} className="relative w-[436px] h-[614px] overflow-hidden shrink-0">
+              <img src={portraitImage} alt="Portrait" className="absolute inset-0 size-full object-cover block" />
+              <div
+                ref={desktopOverlayRef}
+                className="absolute inset-0 bg-black"
+              />
             </div>
           </div>
         </div>
