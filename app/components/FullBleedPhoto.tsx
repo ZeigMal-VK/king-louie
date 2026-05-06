@@ -3,7 +3,7 @@ const mobileImage = 'https://www.figma.com/api/mcp/asset/80b353fb-3e2e-4a6a-8c30
 
 export default function FullBleedPhoto() {
   return (
-    <div className="relative w-full h-[500px] md:h-[900px] overflow-hidden">
+    <div data-nav-theme="dark" className="relative w-full h-[500px] md:h-[900px] overflow-hidden bg-black">
       <img
         src={desktopImage}
         alt=""

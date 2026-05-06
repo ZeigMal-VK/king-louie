@@ -27,7 +27,7 @@ const services = [
 
 export default function Services() {
   return (
-    <section className="bg-black px-4 md:px-8 py-12 md:py-20 flex flex-col gap-8 md:gap-12">
+    <section data-nav-theme="dark" className="bg-black px-4 md:px-8 py-12 md:py-20 flex flex-col gap-8 md:gap-12">
 
       {/* [ services ] */}
       <p

@@ -6,7 +6,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 gsap.registerPlugin(ScrollTrigger)
 
-const heroImage = 'https://www.figma.com/api/mcp/asset/affd98dc-478b-419d-a180-5634ee5ec868'
+const heroImage = '/images/hero.png'
 const navLinks = ['About', 'Services', 'Projects', 'News', 'Contact']
 
 function NavLink({ children }: { children: string }) {
@@ -28,39 +28,43 @@ function NavLink({ children }: { children: string }) {
       {children}
       <span
         ref={lineRef}
-        className="absolute bottom-0 left-0 w-full h-px bg-black"
+        className="absolute bottom-0 left-0 w-full h-px bg-current"
         style={{ transform: 'scaleX(0)', transformOrigin: 'left center' }}
       />
     </a>
   )
 }
 
-function CtaButton({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+function CtaButton({ children, className = '', dark = false }: { children: React.ReactNode; className?: string; dark?: boolean }) {
   const fillRef = useRef<HTMLSpanElement>(null)
   const textRef = useRef<HTMLSpanElement>(null)
+
+  const baseColor = dark ? '#000' : '#fff'
+  const hoverColor = dark ? '#fff' : '#000'
 
   const onEnter = () => {
     gsap.fromTo(fillRef.current,
       { scaleX: 0, transformOrigin: 'left center' },
       { scaleX: 1, duration: 0.4, ease: 'power3.out', transformOrigin: 'left center' }
     )
-    gsap.to(textRef.current, { color: '#000', duration: 0.2, delay: 0.1 })
+    gsap.to(textRef.current, { color: hoverColor, duration: 0.2, delay: 0.1 })
   }
 
   const onLeave = () => {
     gsap.to(fillRef.current, { scaleX: 0, duration: 0.35, ease: 'power3.in', transformOrigin: 'right center' })
-    gsap.to(textRef.current, { color: '#fff', duration: 0.15 })
+    // clearProps:'color' lets the className take over again — important so the button reflects a later `dark` prop change
+    gsap.to(textRef.current, { color: baseColor, duration: 0.15, clearProps: 'color' })
   }
 
   return (
     <button
-      className={`relative overflow-hidden bg-black text-white text-[14px] font-medium tracking-[-0.035em] px-4 py-3 rounded-full ${className}`}
+      className={`relative overflow-hidden text-[14px] font-medium tracking-[-0.035em] px-4 py-3 rounded-full transition-colors duration-300 ${dark ? 'bg-white text-black' : 'bg-black text-white'} ${className}`}
       onMouseEnter={onEnter}
       onMouseLeave={onLeave}
     >
       <span
         ref={fillRef}
-        className="absolute inset-0 bg-white rounded-full pointer-events-none"
+        className={`absolute inset-0 rounded-full pointer-events-none ${dark ? 'bg-black' : 'bg-white'}`}
         style={{ transform: 'scaleX(0)' }}
       />
       <span ref={textRef} className="relative z-10">{children}</span>
@@ -70,6 +74,7 @@ function CtaButton({ children, className = '' }: { children: React.ReactNode; cl
 
 export default function Hero() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [navOverDark, setNavOverDark] = useState(false)
   const overlayRef = useRef<HTMLDivElement>(null)
   const linkRefs = useRef<(HTMLAnchorElement | null)[]>([])
   const navRef = useRef<HTMLElement>(null)
@@ -83,13 +88,31 @@ export default function Hero() {
   const desktopSpecterRef = useRef<HTMLSpanElement>(null)
 
   // Mobile parallax refs
-  const mobileHarveyGroupRef = useRef<HTMLDivElement>(null)
+  const mobileLabelRef = useRef<HTMLParagraphElement>(null)
+  const mobileHarveyRef = useRef<HTMLHeadingElement>(null)
   const mobileSpecterRef = useRef<HTMLHeadingElement>(null)
 
+  // Description block refs (entrance animation only)
+  const desktopDescRef = useRef<HTMLDivElement>(null)
+  const mobileDescRef = useRef<HTMLDivElement>(null)
+
   useLayoutEffect(() => {
+    // Reveal the wrapper (was hidden via Tailwind for SSR) without applying a transform — a transform on heroContentRef
+    // would create a stacking context and prevent mix-blend-overlay on the title from reaching the photo.
+    gsap.set(heroContentRef.current, { autoAlpha: 1 })
+
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
     tl.fromTo(navRef.current, { y: -24, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.8, delay: 0.1 })
-    tl.fromTo(heroContentRef.current, { y: 40, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 1 }, '-=0.45')
+    tl.fromTo(
+      [
+        desktopLabelRef.current, desktopHarveyRef.current, desktopSpecterRef.current,
+        mobileLabelRef.current, mobileHarveyRef.current, mobileSpecterRef.current,
+        desktopDescRef.current, mobileDescRef.current,
+      ].filter(Boolean),
+      { y: 40, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 1, stagger: 0.04 },
+      '-=0.45'
+    )
   }, [])
 
   useEffect(() => {
@@ -104,7 +127,7 @@ export default function Hero() {
     const ctx = gsap.context(() => {
       gsap.to(bgRef.current, { scale: 1.2, ease: 'none', scrollTrigger: st })
 
-      gsap.to([desktopHarveyRef.current, desktopLabelRef.current, mobileHarveyGroupRef.current], {
+      gsap.to([desktopHarveyRef.current, desktopLabelRef.current, mobileLabelRef.current, mobileHarveyRef.current], {
         x: -vw * 0.6,
         ease: 'none',
         scrollTrigger: st,
@@ -118,6 +141,28 @@ export default function Hero() {
     }, sectionRef)
 
     return () => ctx.revert()
+  }, [])
+
+  // Nav theme: switch to white when a [data-nav-theme="dark"] section is behind the nav
+  useEffect(() => {
+    const navEl = navRef.current
+    if (!navEl) return
+    const navHeight = navEl.offsetHeight
+    const intersecting = new Set<Element>()
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) intersecting.add(entry.target)
+          else intersecting.delete(entry.target)
+        }
+        setNavOverDark(intersecting.size > 0)
+      },
+      { rootMargin: `0px 0px -${window.innerHeight - navHeight}px 0px` }
+    )
+
+    document.querySelectorAll('[data-nav-theme="dark"]').forEach(el => observer.observe(el))
+    return () => observer.disconnect()
   }, [])
 
   const openMenu = () => {
@@ -142,7 +187,7 @@ export default function Hero() {
   }
 
   return (
-    <section ref={sectionRef} className="relative h-screen overflow-hidden flex flex-col px-4 md:px-8 md:gap-[240px]">
+    <section ref={sectionRef} className="relative h-screen overflow-hidden flex flex-col px-4 md:px-8">
       {/* Background photo */}
       <img
         ref={bgRef}
@@ -162,26 +207,26 @@ export default function Hero() {
       />
 
       {/* Nav */}
-      <nav ref={navRef} className="relative z-10 shrink-0 flex items-center justify-between py-6">
-        <span className="font-semibold text-[16px] tracking-[-0.04em] capitalize text-black">
+      <nav ref={navRef} className={`fixed top-0 inset-x-0 z-40 flex items-center justify-between py-6 px-4 md:px-8 opacity-0 invisible transition-colors duration-300 ${navOverDark ? 'text-white' : 'text-black'}`}>
+        <span className="font-semibold text-[16px] tracking-[-0.04em] capitalize">
           H.Studio
         </span>
 
-        <div className="hidden md:flex items-center gap-14 font-semibold text-[16px] tracking-[-0.04em] capitalize text-black">
+        <div className="hidden md:flex items-center gap-14 font-semibold text-[16px] tracking-[-0.04em] capitalize">
           {navLinks.map(link => (
             <NavLink key={link}>{link}</NavLink>
           ))}
         </div>
 
-        <CtaButton className="hidden md:inline-flex items-center justify-center">
+        <CtaButton dark={navOverDark} className="hidden md:inline-flex items-center justify-center">
           Let&apos;s talk
         </CtaButton>
 
         <button className="md:hidden" onClick={openMenu} aria-label="Open menu">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <rect y="3" width="24" height="2.5" fill="black" />
-            <rect y="10.75" width="24" height="2.5" fill="black" />
-            <rect y="18.5" width="24" height="2.5" fill="black" />
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <rect y="3" width="24" height="2.5" />
+            <rect y="10.75" width="24" height="2.5" />
+            <rect y="18.5" width="24" height="2.5" />
           </svg>
         </button>
       </nav>
@@ -220,34 +265,47 @@ export default function Hero() {
       </div>
 
       {/* Hero content */}
-      <div ref={heroContentRef} className="relative flex-1 md:flex-none flex flex-col justify-between md:justify-start pb-6 md:pb-0">
+      <div ref={heroContentRef} className="relative flex-1 flex flex-col justify-end md:justify-center pb-6 md:pb-0 opacity-0 invisible">
 
-        {/* Mobile: label + Harvey group (exits left) */}
-        <div ref={mobileHarveyGroupRef} className="md:hidden flex flex-col items-start w-full">
-          <div className="flex items-center justify-center w-full">
+        {/* Mobile: bottom-aligned 341px content block (matches Figma node 1:290) */}
+        <div className="md:hidden flex flex-col items-center justify-between h-[341px] w-full">
+          {/* Title block: label + Harvey + Specter (siblings — no wrapping group, so mix-blend-overlay reaches the image) */}
+          <div className="flex flex-col items-center w-full">
             <p
+              ref={mobileLabelRef}
               className="text-[14px] text-white uppercase mix-blend-overlay leading-[1.1] whitespace-nowrap"
               style={{ fontFamily: 'var(--font-geist-mono)' }}
             >
               [ Hello i&apos;m ]
             </p>
+            <h1
+              ref={mobileHarveyRef}
+              className="font-medium capitalize text-white text-center mix-blend-overlay w-full"
+              style={{ letterSpacing: '-0.07em', fontSize: 'min(96px, 25.6vw)', lineHeight: 0.8 }}
+            >
+              Harvey
+            </h1>
+            <h1
+              ref={mobileSpecterRef}
+              className="font-medium capitalize text-white text-center mix-blend-overlay w-full"
+              style={{ letterSpacing: '-0.07em', fontSize: 'min(96px, 25.6vw)', lineHeight: 0.8 }}
+            >
+              Specter
+            </h1>
           </div>
-          <h1
-            className="font-medium capitalize text-white text-center mix-blend-overlay leading-[0.85] w-full"
-            style={{ letterSpacing: '-0.07em', fontSize: 'min(96px, 21vw)' }}
-          >
-            Harvey
-          </h1>
-        </div>
 
-        {/* Mobile: Specter (exits right) */}
-        <h1
-          ref={mobileSpecterRef}
-          className="md:hidden font-medium capitalize text-white text-center mix-blend-overlay leading-[0.85] w-full"
-          style={{ letterSpacing: '-0.07em', fontSize: 'min(96px, 21vw)' }}
-        >
-          Specter
-        </h1>
+          {/* Description + CTA */}
+          <div ref={mobileDescRef} className="flex flex-col gap-[17px] items-start w-[293px] max-w-full">
+            <p className="text-[14px] font-bold italic text-[#1f1f1f] tracking-[-0.035em] uppercase leading-[1.1]">
+              H.Studio is a{' '}
+              <span className="font-normal">full-service</span>
+              {' '}creative studio creating beautiful digital experiences and products. We are an{' '}
+              <span className="font-normal">award winning</span>
+              {' '}desing and art group specializing in branding, web design and engineering.
+            </p>
+            <CtaButton className="self-start">Let&apos;s talk</CtaButton>
+          </div>
+        </div>
 
         {/* Desktop: w-fit column */}
         <div className="hidden md:flex flex-col mx-auto w-fit">
@@ -260,12 +318,12 @@ export default function Hero() {
           </p>
           <div
             className="font-medium capitalize text-white mix-blend-overlay leading-[1.1] whitespace-pre"
-            style={{ fontSize: 198, letterSpacing: '-0.07em' }}
+            style={{ fontSize: 'clamp(72px, 13.75vw, 220px)', letterSpacing: '-0.07em' }}
           >
             <span ref={desktopHarveyRef} className="inline-block">{`Harvey   `}</span>
             <span ref={desktopSpecterRef} className="inline-block">Specter</span>
           </div>
-          <div className="self-end flex flex-col gap-[17px] w-[294px]">
+          <div ref={desktopDescRef} className="self-end flex flex-col gap-[17px] w-[294px]">
             <p className="text-[14px] font-bold italic text-[#1f1f1f] tracking-[-0.035em] uppercase leading-[1.1]">
               H.Studio is a{' '}
               <span className="font-normal">full-service</span>
@@ -275,18 +333,6 @@ export default function Hero() {
             </p>
             <CtaButton className="self-start">Let&apos;s talk</CtaButton>
           </div>
-        </div>
-
-        {/* Mobile: description + CTA */}
-        <div className="md:hidden flex flex-col gap-[17px] w-full max-w-[293px]">
-          <p className="text-[14px] font-bold italic text-[#1f1f1f] tracking-[-0.035em] uppercase leading-[1.1]">
-            H.Studio is a{' '}
-            <span className="font-normal">full-service</span>
-            {' '}creative studio creating beautiful digital experiences and products. We are an{' '}
-            <span className="font-normal">award winning</span>
-            {' '}desing and art group specializing in branding, web design and engineering.
-          </p>
-          <CtaButton className="self-start">Let&apos;s talk</CtaButton>
         </div>
 
       </div>

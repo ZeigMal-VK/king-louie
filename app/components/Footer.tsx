@@ -39,7 +39,7 @@ function FooterButton({ children }: { children: React.ReactNode }) {
 
 export default function Footer() {
   return (
-    <footer className="bg-black">
+    <footer data-nav-theme="dark" className="bg-black">
 
       {/* ── Desktop ── */}
       <div className="hidden md:flex flex-col pt-12 px-8">
